@@ -16,13 +16,13 @@ use bevy::prelude::*;
 /// If this fails to happen, weirdness will ensue.
 pub fn on_add_entity_with_parent(
     q_add_entity_without_parent: Query<
-        (Entity, &Parent),
+        (Entity, &ChildOf),
         (
             With<RapierContextEntityLink>,
-            Or<(Changed<RapierContextEntityLink>, Changed<Parent>)>,
+            Or<(Changed<RapierContextEntityLink>, Changed<ChildOf>)>,
         ),
     >,
-    q_parent: Query<&Parent>,
+    q_parent: Query<&ChildOf>,
     q_physics_world: Query<&RapierContextEntityLink>,
     mut commands: Commands,
 ) {
@@ -106,7 +106,7 @@ fn bubble_down_context_change(
         return;
     };
 
-    children.iter().for_each(|&child| {
+    children.iter().for_each(|child| {
         if q_physics_context
             .get(child)
             .map(|x| *x == new_physics_context)

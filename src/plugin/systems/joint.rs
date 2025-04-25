@@ -8,6 +8,7 @@ use crate::plugin::context::RapierContextEntityLink;
 use crate::plugin::context::RapierContextJoints;
 use crate::plugin::context::RapierRigidBodySet;
 use bevy::prelude::*;
+use log::error;
 
 /// System responsible for creating new Rapier joints from the related `bevy_rapier` components.
 pub fn init_joints(
@@ -22,7 +23,7 @@ pub fn init_joints(
         (Entity, Option<&RapierContextEntityLink>, &MultibodyJoint),
         Without<RapierMultibodyJointHandle>,
     >,
-    parent_query: Query<&Parent>,
+    parent_query: Query<&ChildOf>,
 ) {
     for (entity, entity_context_link, joint) in impulse_joints.iter() {
         // Get rapier context from RapierContextEntityLink or insert its default value.

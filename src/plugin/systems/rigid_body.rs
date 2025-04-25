@@ -14,7 +14,7 @@ use std::collections::HashMap;
 pub type RigidBodyWritebackComponents<'a> = (
     &'a RapierRigidBodyHandle,
     &'a RapierContextEntityLink,
-    Option<&'a Parent>,
+    Option<&'a ChildOf>,
     Option<&'a mut Transform>,
     Option<&'a mut TransformInterpolation>,
     Option<&'a mut Velocity>,
@@ -465,7 +465,7 @@ pub fn writeback_rigid_bodies(
                 //       that we do to detect if the user’s transform has to be written
                 //       into the rigid-body.
                 if let Some(parent_global_transform) =
-                    parent.and_then(|p| global_transforms.get(**p).ok())
+                    parent.and_then(|p| global_transforms.get(p.0).ok())
                 {
                     // We need to compute the new local transform such that:
                     // curr_parent_global_transform * new_transform = interpolated_pos

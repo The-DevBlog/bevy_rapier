@@ -1,13 +1,12 @@
 use crate::pipeline::{CollisionEvent, ContactForceEvent};
 use crate::prelude::*;
 use crate::reflect::IntegrationParametersWrapper;
-use bevy::ecs::{
-    intern::Interned,
-    schedule::{ScheduleLabel, SystemConfigs},
-    system::SystemParamItem,
-};
-use bevy::utils::HashSet;
+use bevy::ecs::schedule::ScheduleConfigs;
+use bevy::ecs::system::ScheduleSystem;
+use bevy::ecs::{intern::Interned, schedule::ScheduleLabel, system::SystemParamItem};
+use bevy::platform::collections::HashSet;
 use bevy::{prelude::*, transform::TransformSystem};
+use log::warn;
 use rapier::dynamics::IntegrationParameters;
 use std::marker::PhantomData;
 
@@ -121,7 +120,7 @@ where
     /// Provided for use when staging systems outside of this plugin using
     /// [`with_default_system_setup(false)`](Self::with_default_system_setup).
     /// See [`PhysicsSet`] for a description of these systems.
-    pub fn get_systems(set: PhysicsSet) -> SystemConfigs {
+    pub fn get_systems(set: PhysicsSet) -> ScheduleConfigs<ScheduleSystem> {
         match set {
             PhysicsSet::SyncBackend => (
                 (
@@ -705,23 +704,28 @@ mod test {
         pub fn init_rapier_configuration(
             mut config: Query<&mut RapierConfiguration, With<DefaultRapierContext>>,
         ) {
-            let mut config = config.single_mut();
-            *config = RapierConfiguration {
-                force_update_from_transform_changes: true,
-                ..RapierConfiguration::new(1f32)
-            };
+            if let Ok(mut config) = config.single_mut() {
+                *config = RapierConfiguration {
+                    force_update_from_transform_changes: true,
+                    ..RapierConfiguration::new(1.0)
+                };
+            }
         }
 
         pub fn setup_physics(mut commands: Commands) {
             let parent = commands
                 .spawn(Transform::from_scale(Vec3::splat(5f32)))
                 .id();
-            let mut entity = commands.spawn((
-                Collider::ball(1f32),
-                Transform::from_translation(Vec3::new(200f32, 100f32, 3f32)),
-                RigidBody::Fixed,
-            ));
-            entity.set_parent(parent);
+
+            let entity = commands
+                .spawn((
+                    Collider::ball(1f32),
+                    Transform::from_translation(Vec3::new(200f32, 100f32, 3f32)),
+                    RigidBody::Fixed,
+                ))
+                .id();
+
+            commands.entity(entity).insert(ChildOf(parent));
         }
     }
 }

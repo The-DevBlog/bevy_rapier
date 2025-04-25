@@ -41,8 +41,11 @@ impl<'w, 's, T: query::QueryFilter + 'static> ReadRapierContext<'w, 's, T> {
     ///
     /// Use the underlying query [`ReadRapierContext::rapier_context`] for safer alternatives.
     pub fn single(&self) -> RapierContext {
-        let (simulation, colliders, joints, query_pipeline, rigidbody_set) =
-            self.rapier_context.single();
+        let (simulation, colliders, joints, query_pipeline, rigidbody_set) = self
+            .rapier_context
+            .single()
+            .expect("ReadRapierContext::single(): expected exactly one RapierContext");
+
         RapierContext {
             simulation,
             colliders,
@@ -99,8 +102,11 @@ impl<'w, 's, T: query::QueryFilter + 'static> WriteRapierContext<'w, 's, T> {
     /// SAFETY: This method will panic if its underlying query fails.
     /// Use the underlying query [`WriteRapierContext::rapier_context`] for safer alternatives.
     pub fn single(&self) -> RapierContext {
-        let (simulation, colliders, joints, query_pipeline, rigidbody_set) =
-            self.rapier_context.single();
+        let (simulation, colliders, joints, query_pipeline, rigidbody_set) = self
+            .rapier_context
+            .single()
+            .expect("ReadRapierContext::single(): expected exactly one RapierContext");
+
         RapierContext {
             simulation,
             colliders,
@@ -114,8 +120,11 @@ impl<'w, 's, T: query::QueryFilter + 'static> WriteRapierContext<'w, 's, T> {
     /// SAFETY: This method will panic if its underlying query fails.
     /// Use the underlying query [`WriteRapierContext::rapier_context`] for safer alternatives.
     pub fn single_mut(&mut self) -> RapierContextMut {
-        let (simulation, colliders, joints, query_pipeline, rigidbody_set) =
-            self.rapier_context.single_mut();
+        let (simulation, colliders, joints, query_pipeline, rigidbody_set) = self
+            .rapier_context
+            .single_mut()
+            .expect("ReadRapierContext::single(): expected exactly one RapierContext");
+
         RapierContextMut {
             simulation,
             colliders,

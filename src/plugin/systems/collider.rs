@@ -14,8 +14,10 @@ use crate::prelude::{
 };
 use crate::utils;
 use bevy::prelude::*;
+use log::error;
 use rapier::dynamics::RigidBodyHandle;
 use rapier::geometry::ColliderBuilder;
+
 #[cfg(all(feature = "dim3", feature = "async-collider"))]
 use {
     crate::prelude::{AsyncCollider, AsyncSceneCollider},
@@ -93,7 +95,7 @@ pub fn apply_collider_user_changes(
             (RapierEntity, &RapierColliderHandle, &GlobalTransform),
             (Without<RapierRigidBodyHandle>, Changed<GlobalTransform>),
         >,
-        Query<&Parent>,
+        Query<&ChildOf>,
         Query<&Transform>,
     ),
 
@@ -322,7 +324,7 @@ pub fn apply_collider_user_changes(
 pub(crate) fn collider_offset(
     entity: Entity,
     rigidbody_set: &RapierRigidBodySet,
-    parent_query: &Query<&Parent>,
+    parent_query: &Query<&ChildOf>,
     transform_query: &Query<&Transform>,
 ) -> (Option<RigidBodyHandle>, Transform) {
     let mut body_entity = entity;
@@ -363,7 +365,7 @@ pub fn init_colliders(
     default_context_access: Query<Entity, With<DefaultRapierContext>>,
     colliders: Query<(ColliderComponents, Option<&GlobalTransform>), Without<RapierColliderHandle>>,
     mut rigid_body_mprops: Query<&mut ReadMassProperties>,
-    parent_query: Query<&Parent>,
+    parent_query: Query<&ChildOf>,
     transform_query: Query<&Transform>,
 ) {
     for (
@@ -655,7 +657,7 @@ pub mod test {
         let mut scenes = app.world_mut().resource_mut::<Assets<Scene>>();
         let scene = scenes.add(Scene::new(World::new()));
 
-        let mut named_shapes = bevy::utils::HashMap::new();
+        let mut named_shapes = bevy_platform::collections::hash_map::HashMap::new();
         named_shapes.insert("Capsule".to_string(), None);
         let parent = app
             .world_mut()
